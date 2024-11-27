@@ -1,0 +1,135 @@
+---
+import Modal from './Modal.astro';
+
+export interface Image {
+  id: string;
+  src: string;
+  alt: string;
+  category: string;
+}
+
+export const images: Image[] = [
+  {
+    id: "landscape-mountain",
+    src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e",
+    alt: "Landscape mountain view",
+    category: "Nature"
+  },
+  {
+    id: "forest-fog",
+    src: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d",
+    alt: "Forest in fog",
+    category: "Nature"
+  },
+  {
+    id: "waterfall",
+    src: "https://images.unsplash.com/photo-1433086966358-54859d0ed716",
+    alt: "Waterfall",
+    category: "Nature"
+  },
+  {
+    id: "mountain-range",
+    src: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05",
+    alt: "Mountain range",
+    category: "Nature"
+  },
+  {
+    id: "sunlight-trees",
+    src: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
+    alt: "Sunlight through trees",
+    category: "Nature"
+  },
+  {
+    id: "lake-view",
+    src: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e",
+    alt: "Lake view",
+    category: "Nature"
+  }
+];
+---
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+  {images.map((image) => (
+    <button 
+      class="relative group overflow-hidden w-full h-[400px] cursor-pointer gallery-item"
+      data-image-id={image.id}
+      data-image-src={image.src}
+      data-image-alt={image.alt}
+      data-image-category={image.category}
+    >
+      <img
+        src={image.src}
+        alt={image.alt}
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+      />
+      <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+        <div class="text-center">
+          <p class="text-white text-lg font-bold">{image.alt}</p>
+          <p class="text-gray-300">{image.category}</p>
+        </div>
+      </div>
+      <div class="glow-effect"></div>
+    </button>
+  ))}
+</div>
+
+<Modal />
+
+<style>
+  .gallery-item {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .glow-effect {
+    position: absolute;
+    inset: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.1);
+    transition: transform 0.6s ease-out, opacity 0.3s ease-out;
+    pointer-events: none;
+    z-index: 1;
+    width: 200%;
+    height: 200%;
+  }
+
+  .gallery-item:hover .glow-effect {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* Ensure the glow effect doesn't interfere with the image */
+  .gallery-item img {
+    position: relative;
+    z-index: 0;
+  }
+
+  /* Ensure the overlay stays on top of the glow */
+  .gallery-item > div:not(.glow-effect) {
+    z-index: 2;
+  }
+</style>
+
+<script>
+  const buttons = document.querySelectorAll('[data-image-id]');
+  const modal = document.getElementById('imageModal');
+  const modalImage = modal?.querySelector('img');
+  let lastScrollPosition = 0;
+
+  buttons.forEach(button => {
+    button.addEventListener('click', () => {
+      const imageId = button.getAttribute('data-image-id');
+      const imageSrc = button.getAttribute('data-image-src');
+      const imageAlt = button.getAttribute('data-image-alt');
+
+      if (modal && modalImage && imageSrc && imageAlt) {
+        lastScrollPosition = window.scrollY;
+        modalImage.src = imageSrc;
+        modalImage.alt = imageAlt;
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+    });
+  });
+</script>

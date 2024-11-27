@@ -1,0 +1,20 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { images } from '../../components/Gallery.astro';
+import Modal from '../../components/Modal.astro';
+
+export function getStaticPaths() {
+  return images.map(image => ({
+    params: { id: image.id },
+    props: { image },
+  }));
+}
+
+const { image } = Astro.props;
+
+export const prerender = true;
+---
+
+<Layout title={`${image.alt} - Afnan Choudhury Photography`}>
+  <Modal image={image} />
+</Layout>

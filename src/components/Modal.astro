@@ -1,0 +1,159 @@
+---
+---
+
+<div id="imageModal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+  <button 
+    id="closeModal" 
+    class="absolute top-6 right-6 text-white z-50 p-2 hover:opacity-80"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
+  
+  <!-- Previous Button -->
+  <button 
+    id="prevImage" 
+    class="absolute left-4 top-1/2 -translate-y-1/2 text-white z-50 p-2 hover:opacity-80 bg-black/20 rounded-full"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+    </svg>
+  </button>
+
+  <!-- Next Button -->
+  <button 
+    id="nextImage" 
+    class="absolute right-4 top-1/2 -translate-y-1/2 text-white z-50 p-2 hover:opacity-80 bg-black/20 rounded-full"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    </svg>
+  </button>
+
+  <div class="absolute inset-0 flex items-center justify-center p-8">
+    <div class="w-[75%] h-[75%] flex items-center justify-center relative group">
+      <div class="relative w-full h-full flex items-center justify-center bg-black/20 backdrop-blur-sm rounded-lg border-[3px] border-[#FFD700]/30">
+        <div class="absolute inset-0 rounded-lg bg-gradient-to-r from-[#FFD700]/10 via-transparent to-[#FFD700]/10"></div>
+        <img 
+          src=""
+          alt=""
+          class="max-w-full max-h-full object-contain transition-opacity duration-300 relative z-10"
+        />
+        <div class="absolute left-0 right-0 bottom-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 pointer-events-none rounded-b-lg z-20">
+          <div class="text-left">
+            <p class="text-white text-lg font-bold" id="modalImageTitle"></p>
+            <p class="text-gray-300 text-sm" id="modalImageCategory"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById('imageModal');
+  const closeButton = document.getElementById('closeModal');
+  const prevButton = document.getElementById('prevImage');
+  const nextButton = document.getElementById('nextImage');
+  const modalImage = modal?.querySelector('img');
+  const modalTitle = document.getElementById('modalImageTitle');
+  const modalCategory = document.getElementById('modalImageCategory');
+  let lastScrollPosition = 0;
+  let currentImageIndex = 0;
+  let images = [];
+
+  function closeModal() {
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: lastScrollPosition,
+          behavior: 'instant'
+        });
+      });
+    }
+  }
+
+  function updateImage(index) {
+    if (modalImage && modalTitle && modalCategory && images[index]) {
+      modalImage.style.opacity = '0';
+      setTimeout(() => {
+        modalImage.src = images[index].src;
+        modalImage.alt = images[index].alt;
+        modalTitle.textContent = images[index].alt;
+        modalCategory.textContent = images[index].category;
+        modalImage.style.opacity = '1';
+      }, 300);
+      currentImageIndex = index;
+    }
+  }
+
+  function showPrevImage() {
+    const newIndex = currentImageIndex - 1 < 0 ? images.length - 1 : currentImageIndex - 1;
+    updateImage(newIndex);
+  }
+
+  function showNextImage() {
+    const newIndex = currentImageIndex + 1 >= images.length ? 0 : currentImageIndex + 1;
+    updateImage(newIndex);
+  }
+
+  // Handle keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (!modal?.classList.contains('hidden')) {
+      switch(e.key) {
+        case 'ArrowLeft':
+          showPrevImage();
+          break;
+        case 'ArrowRight':
+          showNextImage();
+          break;
+        case 'Escape':
+          closeModal();
+          break;
+      }
+    }
+  });
+
+  // Close button click
+  closeButton?.addEventListener('click', closeModal);
+
+  // Previous button click
+  prevButton?.addEventListener('click', showPrevImage);
+
+  // Next button click
+  nextButton?.addEventListener('click', showNextImage);
+
+  // Handle click outside modal content
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  // Initialize gallery images
+  document.addEventListener('DOMContentLoaded', () => {
+    const buttons = document.querySelectorAll('[data-image-id]');
+    images = Array.from(buttons).map(button => ({
+      id: button.getAttribute('data-image-id'),
+      src: button.getAttribute('data-image-src'),
+      alt: button.getAttribute('data-image-alt'),
+      category: button.getAttribute('data-image-category')
+    }));
+
+    buttons.forEach((button, index) => {
+      button.addEventListener('click', () => {
+        lastScrollPosition = window.scrollY;
+        if (modal) {
+          modal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+          currentImageIndex = index;
+          updateImage(currentImageIndex);
+        }
+      });
+    });
+  });
+</script>
